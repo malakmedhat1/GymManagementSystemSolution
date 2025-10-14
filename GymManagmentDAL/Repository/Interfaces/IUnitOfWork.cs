@@ -7,14 +7,9 @@ using System.Threading.Tasks;
 
 namespace GymManagmentDAL.Repository.Interfaces
 {
-    public interface IPlanRepository
+    public interface IUnitOfWork
     {
-        // Get All
-        IEnumerable<Plan> GetAll();
-        
-        // Update
-        void Update(Plan plan);
-        
-        Plan? GetById(int id);
+        IGenericRepository<TEntity> GetRepository<TEntity>() where TEntity : BasicEntity, new();
+        int SaveChanges();
     }
 }

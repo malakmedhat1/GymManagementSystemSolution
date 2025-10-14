@@ -9,30 +9,13 @@ using System.Threading.Tasks;
 
 namespace GymManagmentDAL.Repository.Classes
 {
-    internal class PlanRepository : IPlanRepository
+    public class PlanRepository : IPlanRepository
     {
         private readonly GymDBContext _dbContext;
 
         public PlanRepository(GymDBContext dbContext)
         {
             _dbContext = dbContext;
-        }
-        public int Add(Plan plan)
-        {
-            _dbContext.Plans.Add(plan);
-            return _dbContext.SaveChanges();
-        }
-
-        public int Delete(int id)
-        {
-            var plan = _dbContext.Plans.Find(id);
-            if (plan != null)
-            {
-                _dbContext.Plans.Remove(plan);
-                return _dbContext.SaveChanges();
-            }
-            else
-                return 0;
         }
 
         public IEnumerable<Plan> GetAll()
@@ -42,10 +25,6 @@ namespace GymManagmentDAL.Repository.Classes
 
         public Plan? GetById(int id) => _dbContext.Plans.Find(id);
 
-        public int Update(Plan plan)
-        {
-            _dbContext.Plans.Update(plan);
-            return _dbContext.SaveChanges();
-        }
+        public void Update(Plan plan) => _dbContext.Plans.Update(plan);
     }
 }
