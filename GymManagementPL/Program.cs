@@ -1,4 +1,6 @@
+using GymManagmentBLL;
 using GymManagmentDAL.Data.Contexts;
+using GymManagmentDAL.Data.DataSeeding;
 using GymManagmentDAL.Entities;
 using GymManagmentDAL.Repository.Classes;
 using GymManagmentDAL.Repository.Interfaces;
@@ -25,8 +27,26 @@ namespace GymManagementPL
             //builder.Services.AddScoped(typeof(IGenericRepository<>) ,typeof(GenericRepository<>));
             //builder.Services.AddScoped<IPlanRepository, PlanRepository>();
             builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
+            builder.Services.AddScoped<ISessionRepository, SessionRepository>();
+            builder.Services.AddAutoMapper(x => x.AddProfile(new MappingProfile()));
 
             var app = builder.Build();
+
+            #region DataSeeding - Migrate DB
+
+            using (var scope = app.Services.CreateScope())
+            {
+                var services = scope.ServiceProvider;
+                var dBContext = services.GetRequiredService<GymDBContext>();
+                var PendingMigrations = dBContext.Database.GetPendingMigrations();
+                if ( PendingMigrations?.Any()??false)
+                    dBContext.Database.Migrate();
+
+                GymDBContextDataSeeding.SeedData(dBContext);
+            }
+
+            #endregion
+
 
             // Configure the HTTP request pipeline.
             if (!app.Environment.IsDevelopment())
