@@ -12,7 +12,7 @@ using System.Threading.Tasks;
 
 namespace GymManagmentBLL.Services.Classes
 {
-    internal class MemberService : IMemberService
+    public class MemberService : IMemberService
     {
         private readonly IUnitOfWork _unitOfWork;
 
@@ -169,8 +169,16 @@ namespace GymManagmentBLL.Services.Classes
             try
             {
                 
-                if (IsEmailExists(memberToUpdateViewModel.Email) || IsPhoneExists(memberToUpdateViewModel.Phone))
-                    return false;
+                var emailExists = _unitOfWork.GetRepository<Member>()
+                    .GetAll(m => m.Email == memberToUpdateViewModel.Email && m.id != MemberId)
+                    .Any();
+
+                var phoneExists = _unitOfWork.GetRepository<Member>()
+                    .GetAll(m => m.Phone == memberToUpdateViewModel.Phone && m.id != MemberId)
+                    .Any();
+
+                if (emailExists || phoneExists) return false;
+
                 var MemberRepo = _unitOfWork.GetRepository<Member>();
                 var member = MemberRepo.GetById(MemberId);
                 if (member == null)
@@ -202,10 +210,16 @@ namespace GymManagmentBLL.Services.Classes
                 
                 if (member == null)
                     return false;
-                
-                var HasActiveMemberSession = _unitOfWork.GetRepository<MemberSession>()
-                    .GetAll(m => m.MemberId == MemberId && m.Session.StartDate > DateTime.Now)
-                    .Any();
+
+                var SessionIds = _unitOfWork.GetRepository<MemberSession>()
+                    .GetAll(sb => sb.MemberId == MemberId).Select(sb=>sb.SessionId);
+
+                var HasActiveMemberSession = _unitOfWork.GetRepository<Session>()
+                    .GetAll(m => SessionIds.Contains(m.id) && m.StartDate > DateTime.Now).Any();
+
+                //var ActiveMemberSession = _unitOfWork.GetRepository<MemberShip>()
+                //    .GetAll(m => m.MemberId == MemberId && m.Status == "Active")
+                //    .Any();
 
                 if (HasActiveMemberSession)
                     return false;

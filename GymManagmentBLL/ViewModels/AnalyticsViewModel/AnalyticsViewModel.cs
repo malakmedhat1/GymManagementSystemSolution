@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace GymManagmentBLL.ViewModels.AnalyticsViewModel
 {
-    internal class AnalyticsViewModel
+    public class AnalyticsViewModel
     {
         public int TotalMembers { get; set; }
         public int ActiveMembers { get; set; }
